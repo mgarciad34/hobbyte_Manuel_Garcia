@@ -2,6 +2,7 @@ package com.example.plugins
 
 import com.example.controllers.ControladorUsuario
 import com.example.models.Usuario
+import com.example.models.crearUsuario
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -18,6 +19,7 @@ fun Application.configureRouting() {
         get("/api") {
             call.respondText { "Servidor abierto en el puerto 8080" }
         }
+        //Ruta para registrar un usuario
         post("/api/registrar/usuario") {
            try {
                 val crearUsuario = call.receive<Usuario>()
@@ -32,5 +34,25 @@ fun Application.configureRouting() {
                 call.respond(HttpStatusCode.BadRequest, "Formato de datos no válido")
             }
         }
+       post("api/login"){
+           try {
+               val datosLogin = call.receive<crearUsuario>()
+
+               // Verifica que los campos obligatorios no sean nulos
+               if (datosLogin.correo != null && datosLogin.contrasena != null) {
+                   val autenticado = controladorUsuario.loginUsuario(datosLogin.correo, datosLogin.contrasena)
+
+                   if (autenticado) {
+                       call.respond("Inicio de sesión exitoso")
+                   } else {
+                       call.respond("Credenciales incorrectas")
+                   }
+               } else {
+                   call.respond("Correo y contraseña son campos obligatorios")
+               }
+           } catch (ex: Exception) {
+               call.respond("Error en el inicio de sesión: ${ex.message}")
+           }
+       }
     }
 }

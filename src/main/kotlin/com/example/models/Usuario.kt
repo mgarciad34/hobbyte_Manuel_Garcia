@@ -9,3 +9,14 @@ data class Usuario(
     val contrasena: String,
     val estado: String? = null
 )
+
+
+@Serializable
+data class crearUsuario(
+    val id: Int? = null,
+    val nombre: String? = null,
+    val correo: String,
+    val contrasena: String,
+    val estado: String? = null
+)
+
