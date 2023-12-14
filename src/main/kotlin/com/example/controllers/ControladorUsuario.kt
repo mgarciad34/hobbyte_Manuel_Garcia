@@ -2,21 +2,22 @@ package com.example.controllers
 
 import com.example.config.Constantes
 import com.example.config.Database
+import com.example.models.Usuario
 import java.sql.SQLException
 
 class ControladorUsuario {
-    /*fun registrarUsuario(usuario: Usuario): Boolean {
+    fun registrarUsuario(usuario: Usuario): Boolean {
         try {
             Database.abrirConexion()
 
-            val sentencia = "INSERT INTO ${Constantes.TablaUsuarios} (dni, nombre, tfno, clave) VALUES (?, ?, ?, ?)"
+            val sentencia = "INSERT INTO ${Constantes.tabla_Usuario} (nombre, correo, contrasena, estado) VALUES (?, ?, ?, ?)"
+            val estado = usuario.estado ?: "Activo"
+
             val pstmt = Database.conexion!!.prepareStatement(sentencia)
-
             pstmt.setString(1, usuario.nombre)
-            pstmt.setString(2, usuario.apellidos)
-            pstmt.setString(3, usuario.correo)
-            pstmt.setString(4, usuario.contraseña)
-
+            pstmt.setString(2, usuario.correo)
+            pstmt.setString(3, usuario.contrasena)
+            pstmt.setString(4, estado)
             val filasAfectadas = pstmt.executeUpdate()
 
             return filasAfectadas > 0
@@ -27,6 +28,6 @@ class ControladorUsuario {
         }
 
         return false
-    }*/
+    }
 
 }
