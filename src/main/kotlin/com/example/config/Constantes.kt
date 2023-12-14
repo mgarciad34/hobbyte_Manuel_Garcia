@@ -8,5 +8,10 @@ object Constantes {
     var usuario = "root"
     var passwd = ""
 
-    var TablaUsuarios = "usuario"
+    var tabla_Desafios = "desafios"
+    var tabla_Historial = "historial"
+    var tabla_Personaje = "personaje"
+    var tabla_Tablero = "tablero"
+    var tabla_Tablero_Desafio = "tablero_desafio"
+    var tabla_Usuario = "usuario"
 }
