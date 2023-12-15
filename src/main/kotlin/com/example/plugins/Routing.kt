@@ -73,13 +73,11 @@ fun Application.configureRouting() {
                         val thorin = Personaje("Thorin", 50, 50, "Fuerza", idUsuario)
                         val bilbo = Personaje("Bilbo", 50, 50, "Habilidad", idUsuario)
 
-                        // Comprobar si los personajes ya existen
                         val existeGandalf = controladorPersonaje.buscarPersonaje(gandalf.nombre, idUsuario)
                         val existeThorin = controladorPersonaje.buscarPersonaje(thorin.nombre, idUsuario)
                         val existeBilbo = controladorPersonaje.buscarPersonaje(bilbo.nombre, idUsuario)
 
                         if (existeGandalf == -1 && existeThorin == -1 && existeBilbo == -1) {
-                            // Los personajes no existen, crearlos
                             val crearGandalf = controladorPersonaje.crearPersonaje(gandalf)
                             val crearThorin = controladorPersonaje.crearPersonaje(thorin)
                             val crearBilbo = controladorPersonaje.crearPersonaje(bilbo)
@@ -93,7 +91,6 @@ fun Application.configureRouting() {
                                 )
                             }
                         } else {
-                            // Al menos uno de los personajes ya existe
                             call.respond(HttpStatusCode.BadRequest, "El usuario ya tiene estos personajes")
                         }
                     } else {
