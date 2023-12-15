@@ -12,7 +12,7 @@ data class Usuario(
 
 
 @Serializable
-data class crearUsuario(
+data class loginUsuario(
     val id: Int? = null,
     val nombre: String? = null,
     val correo: String,

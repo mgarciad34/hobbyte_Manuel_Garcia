@@ -2,7 +2,7 @@ package com.example.plugins
 
 import com.example.controllers.ControladorUsuario
 import com.example.models.Usuario
-import com.example.models.crearUsuario
+import com.example.models.loginUsuario
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -36,13 +36,13 @@ fun Application.configureRouting() {
         }
        post("api/login"){
            try {
-               val datosLogin = call.receive<crearUsuario>()
+               val datosLogin = call.receive<loginUsuario>()
 
                // Verifica que los campos obligatorios no sean nulos
                if (datosLogin.correo != null && datosLogin.contrasena != null) {
                    val autenticado = controladorUsuario.loginUsuario(datosLogin.correo, datosLogin.contrasena)
 
-                   if (autenticado) {
+                   if (autenticado as Boolean) {
                        call.respond("Inicio de sesión exitoso")
                    } else {
                        call.respond("Credenciales incorrectas")
@@ -54,5 +54,25 @@ fun Application.configureRouting() {
                call.respond("Error en el inicio de sesión: ${ex.message}")
            }
        }
+        post("api/crear/personajes"){
+            try {
+                val datosLogin = call.receive<loginUsuario>()
+
+                // Verifica que los campos obligatorios no sean nulos
+                if (datosLogin.correo != null && datosLogin.contrasena != null) {
+                    val autenticado = controladorUsuario.loginUsuario(datosLogin.correo, datosLogin.contrasena)
+
+                    if (autenticado as Boolean) {
+                        call.respond("Inicio de sesión exitoso")
+                    } else {
+                        call.respond("Credenciales incorrectas")
+                    }
+                } else {
+                    call.respond("Correo y contraseña son campos obligatorios")
+                }
+            } catch (ex: Exception) {
+                call.respond("Error en el inicio de sesión: ${ex.message}")
+            }
+        }
     }
 }
