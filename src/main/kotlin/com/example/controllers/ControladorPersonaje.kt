@@ -32,7 +32,7 @@ class ControladorPersonaje {
         return false
     }
 
-    // En tu ControladorPersonaje.kt
+    // Consulta Personajes
     fun buscarPersonaje(nombre: String, idUsuario: Int): Int {
         try {
             Database.abrirConexion()
@@ -52,7 +52,6 @@ class ControladorPersonaje {
             }
         } catch (ex: SQLException) {
             ex.printStackTrace()
-            // Manejo de errores, podrías lanzar una excepción personalizada si lo prefieres
             return -1
         } finally {
             Database.cerrarConexion()
