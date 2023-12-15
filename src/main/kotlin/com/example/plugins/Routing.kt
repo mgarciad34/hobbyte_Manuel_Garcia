@@ -54,24 +54,27 @@ fun Application.configureRouting() {
                call.respond("Error en el inicio de sesión: ${ex.message}")
            }
        }
-        post("api/crear/personajes"){
+        post("api/crear/personajes") {
             try {
-                val datosLogin = call.receive<loginUsuario>()
+                val credencialesUsuario = call.receive<loginUsuario>()
 
                 // Verifica que los campos obligatorios no sean nulos
-                if (datosLogin.correo != null && datosLogin.contrasena != null) {
-                    val autenticado = controladorUsuario.loginUsuario(datosLogin.correo, datosLogin.contrasena)
+                if (credencialesUsuario.correo != null && credencialesUsuario.contrasena != null) {
+                    val idUsuario =
+                        controladorUsuario.obtenerId(credencialesUsuario.correo, credencialesUsuario.contrasena)
 
-                    if (autenticado as Boolean) {
-                        call.respond("Inicio de sesión exitoso")
+                    if (idUsuario != -1) {
+                        // Si el usuario se loguea correctamente podra  agregar  sus personajes
+                        call.respond("Autenticado correctamente, ID de usuario: $idUsuario")
                     } else {
-                        call.respond("Credenciales incorrectas")
+                        // Credenciales incorrectas
+                        call.respond(HttpStatusCode.Unauthorized, "Credenciales incorrectas")
                     }
                 } else {
-                    call.respond("Correo y contraseña son campos obligatorios")
+                    call.respond(HttpStatusCode.BadRequest, "Correo y contraseña son campos obligatorios")
                 }
             } catch (ex: Exception) {
-                call.respond("Error en el inicio de sesión: ${ex.message}")
+                call.respond(HttpStatusCode.InternalServerError, "Error en el inicio de sesión: ${ex.message}")
             }
         }
     }

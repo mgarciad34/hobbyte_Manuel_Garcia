@@ -7,7 +7,7 @@ import java.sql.SQLException
 
 class ControladorPersonaje {
 
-    fun crearPersonaje():Boolean{
+   /* fun crearPersonaje():Boolean{
         try {
             Database.abrirConexion()
 
@@ -29,6 +29,6 @@ class ControladorPersonaje {
         }
 
         return false
-    }
+    }*/
 
 }

@@ -55,5 +55,30 @@ class ControladorUsuario {
         return false
     }
 
+    //Funcion para obtener el id del usuario
+    fun obtenerId(correo: String, contrasena: String): Int {
+        try {
+            Database.abrirConexion()
+
+            val sentencia = "SELECT id FROM ${Constantes.tabla_Usuario} WHERE correo = ? AND contrasena = ?"
+            val pstmt = Database.conexion!!.prepareStatement(sentencia)
+            pstmt.setString(1, correo)
+            pstmt.setString(2, KtorCifrado.cifrarContrasena(contrasena))
+
+            val resultado = pstmt.executeQuery()
+
+            if (resultado.next()) {
+                return resultado.getInt("id")
+            }
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+        } finally {
+            Database.cerrarConexion()
+        }
+
+        return -1
+    }
+
+
 
 }
