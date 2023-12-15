@@ -8,6 +8,7 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import com.example.config.Token
 
 //Aqui llamamos a las clases de los controladores
 val controladorUsuario = ControladorUsuario()
@@ -43,8 +44,8 @@ fun Application.configureRouting() {
                    val autenticado = controladorUsuario.loginUsuario(datosLogin.correo, datosLogin.contrasena)
 
                    if (autenticado as Boolean) {
-                       call.respond("Inicio de sesión exitoso")
-                   } else {
+                       call.respond("Inicio de sesión exitoso.")
+                   }else {
                        call.respond("Credenciales incorrectas")
                    }
                } else {
