@@ -1,3 +1,6 @@
 package com.example.model
 
-data class Usuario(val id: Int, val nombre: String,  val correo: String, val contrasena: String)
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class Usuario(val nombre: String, val rol: String,  val correo: String, val contrasena: String)
