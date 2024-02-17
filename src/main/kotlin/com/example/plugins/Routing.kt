@@ -4,9 +4,11 @@ import com.example.config.Token
 import com.example.config.generarTablero
 import com.example.controllers.ControladorPartida
 import com.example.controllers.ControladorUsuario
+import com.example.controllers.ControladorUsuarioPersonaje
 import com.example.models.LoginRequest
 import com.example.models.Partida
 import com.example.models.Usuario
+import com.example.models.UsuarioPersonaje
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -16,7 +18,7 @@ import io.ktor.server.routing.*
 //Aqui llamamos a las clases de los controladores
 val controladorUsuario = ControladorUsuario()
 val controladorPartida = ControladorPartida()
-
+val controladorUsuarioPersonaje = ControladorUsuarioPersonaje()
 
 //Archivo para lanzar todas las peticiones de la API
 fun Application.configureRouting() {
@@ -62,6 +64,8 @@ fun Application.configureRouting() {
 
                     if (controladorPartida.crearPartida(partida)) {
                         call.respondText("Tablero creado con éxito. ID de partida: ${partida.id}")
+                        val usuarioPersonaje = UsuarioPersonaje(0, partida.id, 50)
+                        controladorUsuarioPersonaje.crearUsuarioPersonaje(usuarioPersonaje)
                     } else {
                         call.respondText("Error al crear el tablero.")
                     }
