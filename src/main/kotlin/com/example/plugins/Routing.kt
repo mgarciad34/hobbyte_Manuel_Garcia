@@ -28,7 +28,7 @@ fun Application.configureRouting() {
         }
         //Ruta para registrar un usuario
         post("/api/registrar/usuario") {
-           try {
+            try {
                 val crearUsuario = call.receive<Usuario>()
                 val registrado = controladorUsuario.registrarUsuario(crearUsuario)
 
@@ -44,7 +44,7 @@ fun Application.configureRouting() {
         post("/api/login") {
             val request = call.receive<LoginRequest>()
             val usuario = controladorUsuario.loginUsuario(request.correo, request.contrasena)
-            if(usuario != "0"){
+            if (usuario != "0") {
                 val token = Token.generateJWTToken(usuario)
                 call.respond(HttpStatusCode.OK, token)
             }
@@ -75,6 +75,16 @@ fun Application.configureRouting() {
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, "Error interno del servidor: ${e.message}")
             }
+        }
+        get("api/obtener/partidas/{idUsuario}") {
+            val idUsuario = call.parameters["idUsuario"]?.toIntOrNull()
+            if (idUsuario == null) {
+                call.respond(HttpStatusCode.BadRequest, "ID de usuario no válido")
+                return@get
+            }
+
+            val partidas = controladorPartida.obtenerPartidasPorUsuario(idUsuario)
+            call.respond(HttpStatusCode.OK, partidas)
         }
     }
 }

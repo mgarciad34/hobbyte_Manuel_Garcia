@@ -75,7 +75,7 @@ class ControladorUsuario {
         try {
             Database.abrirConexion()
 
-            val sentencia = "SELECT rol FROM ${Constantes.tabla_Usuario} WHERE correo = ? AND contrasena = ?"
+            val sentencia = "SELECT id, rol FROM ${Constantes.tabla_Usuario} WHERE correo = ? AND contrasena = ?"
             val pstmt = Database.conexion!!.prepareStatement(sentencia)
             pstmt.setString(1, correo)
             pstmt.setString(2, KtorCifrado.cifrarContrasena(contrasena))

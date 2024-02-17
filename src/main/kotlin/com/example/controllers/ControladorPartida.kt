@@ -43,4 +43,31 @@ class ControladorPartida {
 
         return false
     }
+
+    fun obtenerPartidasPorUsuario(idUsuario: Int): List<Partida> {
+        val partidas = mutableListOf<Partida>()
+        try {
+            Database.abrirConexion()
+
+            val sentencia = "SELECT id, tablero FROM ${Constantes.tabla_Partidas} WHERE id_usuario = ?"
+            val pstmt = Database.conexion!!.prepareStatement(sentencia)
+            pstmt.setInt(1, idUsuario)
+
+            val rs = pstmt.executeQuery()
+
+            while (rs.next()) {
+                val partida = Partida(
+                    id = rs.getInt("id"),
+                    idUsuario = idUsuario,
+                    tablero = rs.getString("tablero")
+                )
+                partidas.add(partida)
+            }
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+        } finally {
+            Database.cerrarConexion()
+        }
+        return partidas
+    }
 }
