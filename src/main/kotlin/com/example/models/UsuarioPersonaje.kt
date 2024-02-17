@@ -9,6 +9,6 @@ data class UsuarioPersonaje(
     val magia: Int? = null,
     val fuerza: Int? = null,
     val habilidad: Int? = null,
-    val puntos: Int? = null
+    val prueba: Int? = null
 
 )

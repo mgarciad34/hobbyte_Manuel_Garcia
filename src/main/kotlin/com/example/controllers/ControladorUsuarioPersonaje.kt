@@ -14,7 +14,7 @@ class ControladorUsuarioPersonaje() {
             // Aquí podrías agregar validaciones o verificaciones necesarias
 
             val sentencia =
-                "INSERT INTO ${Constantes.tabla_UsuarioPersonaje} (id_partida, magia, fuerza, habilidad, puntos) VALUES (?, ?, ?, ?, ?)"
+                "INSERT INTO ${Constantes.tabla_UsuarioPersonaje} (id_partida, magia, fuerza, habilidad, prueba) VALUES (?, ?, ?, ?, ?)"
 
             val pstmt: PreparedStatement = if (usuarioPersonaje.id == 0) {
                 Database.conexion!!.prepareStatement(sentencia, PreparedStatement.RETURN_GENERATED_KEYS)
@@ -27,7 +27,7 @@ class ControladorUsuarioPersonaje() {
             pstmt.setObject(2, usuarioPersonaje.magia)
             pstmt.setObject(3, usuarioPersonaje.fuerza)
             pstmt.setObject(4, usuarioPersonaje.habilidad)
-            pstmt.setObject(5, usuarioPersonaje.puntos)
+            pstmt.setObject(5, usuarioPersonaje.prueba)
 
             val filasAfectadas = pstmt.executeUpdate()
 
