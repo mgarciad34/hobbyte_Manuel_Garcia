@@ -1,16 +1,15 @@
 package com.example.plugins
 
-import com.example.config.Token
+import com.auth0.jwt.exceptions.JWTVerificationException
+import com.example.config.TokenManager
 import com.example.config.generarTablero
 import com.example.controllers.ControladorPartida
 import com.example.controllers.ControladorUsuario
 import com.example.controllers.ControladorUsuarioPersonaje
-import com.example.models.LoginRequest
-import com.example.models.Partida
-import com.example.models.Usuario
-import com.example.models.UsuarioPersonaje
+import com.example.models.*
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -19,6 +18,10 @@ import io.ktor.server.routing.*
 val controladorUsuario = ControladorUsuario()
 val controladorPartida = ControladorPartida()
 val controladorUsuarioPersonaje = ControladorUsuarioPersonaje()
+
+
+//Aqui llamamos al token
+val tokenManager = TokenManager()
 
 //Archivo para lanzar todas las peticiones de la API
 fun Application.configureRouting() {
@@ -44,47 +47,75 @@ fun Application.configureRouting() {
         post("/api/login") {
             val request = call.receive<LoginRequest>()
             val usuario = controladorUsuario.loginUsuario(request.correo, request.contrasena)
-            if (usuario != "0") {
-                val token = Token.generateJWTToken(usuario)
-                call.respond(HttpStatusCode.OK, token)
-            }
 
+            if (usuario == null) {
+                call.response.status(HttpStatusCode.NotFound)
+                call.respond(Respuesta("Usuario ${request.correo} incorrecto", HttpStatusCode.NotFound.value))
+            } else {
+                val token = tokenManager.generateJWTToken(usuario)
+                call.respond(token)
+            }
         }
         post("/api/crear/tablero") {
             try {
-                val partida = call.receive<Partida>()
+                val token = call.request.headers["Authorization"]?.removePrefix("Bearer ")
+                if (token != null) {
+                    val verifier = tokenManager.verifyJWTToken()
+                    val jwt = verifier.verify(token)
+                    val idUsuario = jwt.getClaim("id").asInt()
+                    val rolUsuario = jwt.getClaim("rol").asString()
 
-                if (partida.idUsuario != null) {
-                    val generarTablero = generarTablero()
+                    if (rolUsuario == "usuario") {
+                        val generarTablero = generarTablero()
 
-                    val casillas = call.parameters["casillas"]?.toIntOrNull() ?: 20
-                    val tablero = generarTablero.crearTablero(casillas)
+                        val tablero = generarTablero.crearTablero(20)
+                        val partida = Partida(
+                            0, idUsuario, tablero.toString()
+                        )
 
-                    partida.tablero = tablero.toString()
-
-                    if (controladorPartida.crearPartida(partida)) {
-                        call.respondText("Tablero creado con éxito. ID de partida: ${partida.id}")
-                        val usuarioPersonaje = UsuarioPersonaje(0, partida.id, 50, 50, 50, 0)
-                        controladorUsuarioPersonaje.crearUsuarioPersonaje(usuarioPersonaje)
+                        if (controladorPartida.crearPartida(partida)) {
+                            call.respondText("Tablero creado con éxito. ID de partida: ${partida.id}")
+                            val usuarioPersonaje = UsuarioPersonaje(0, partida.id, 50, 50, 50, 0)
+                            controladorUsuarioPersonaje.crearUsuarioPersonaje(usuarioPersonaje)
+                        } else {
+                            call.respondText("Error al crear el tablero.")
+                        }
                     } else {
-                        call.respondText("Error al crear el tablero.")
+                        call.respond(HttpStatusCode.BadRequest, "Error: El ID de usuario o el rol proporcionado no coincide con los del token")
                     }
                 } else {
-                    call.respond(HttpStatusCode.BadRequest, "Error: No se proporcionó el ID de usuario o es inválido.")
+                    call.respond(HttpStatusCode.Unauthorized, "Token JWT no proporcionado en la solicitud")
                 }
+            } catch (e: JWTVerificationException) {
+                call.respond(HttpStatusCode.Unauthorized, "Error al verificar el token JWT: ${e.message}")
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, "Error interno del servidor: ${e.message}")
             }
         }
-        get("api/obtener/partidas/{idUsuario}") {
-            val idUsuario = call.parameters["idUsuario"]?.toIntOrNull()
-            if (idUsuario == null) {
-                call.respond(HttpStatusCode.BadRequest, "ID de usuario no válido")
-                return@get
-            }
+        get("/api/obtener/partidas/{idUsuario}") {
+            try {
+                val token = call.request.headers["Authorization"]?.removePrefix("Bearer ")
+                if (token != null) {
+                    val verifier = tokenManager.verifyJWTToken()
+                    verifier.verify(token)
 
-            val partidas = controladorPartida.obtenerPartidasPorUsuario(idUsuario)
-            call.respond(HttpStatusCode.OK, partidas)
+                    val idUsuario = call.parameters["idUsuario"]?.toIntOrNull()
+                    if (idUsuario == null) {
+                        call.respond(HttpStatusCode.BadRequest, "ID de usuario no válido")
+                        return@get
+                    }
+
+                    val partidas = controladorPartida.obtenerPartidasPorUsuario(idUsuario)
+                    call.respond(HttpStatusCode.OK, partidas)
+                } else {
+                    call.respond(HttpStatusCode.Unauthorized, "Token JWT no proporcionado en la solicitud")
+                }
+            } catch (e: JWTVerificationException) {
+                call.respond(HttpStatusCode.Unauthorized, "Error al verificar el token JWT: ${e.message}")
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, "Error interno del servidor: ${e.message}")
+            }
         }
+
     }
 }

@@ -5,10 +5,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Usuario(
     var id: Int = 0,
-    val nombre: String? = null,
-    val rol: String? = null,
-    val correo: String? = null,
-    val contrasena: String? = null
+    var nombre: String? = null,
+    var rol: String? = null,
+    var correo: String? = null,
+    var contrasena: String? = null
 )
 
 

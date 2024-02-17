@@ -4,7 +4,6 @@ import com.example.config.Constantes
 import com.example.config.Database
 import com.example.models.Usuario
 import com.example.config.KtorCifrado
-import com.example.config.Token
 import java.sql.PreparedStatement
 import java.sql.SQLException
 
@@ -69,29 +68,31 @@ class ControladorUsuario {
     }
 
     //Funcion para loguearnos
-    fun loginUsuario(correo: String, contrasena: String): String {
-        var token = ""
-        var mensaje = ""
+    fun loginUsuario(correo: String, contrasena: String): Usuario {
+        val usuario = Usuario()
         try {
             Database.abrirConexion()
 
-            val sentencia = "SELECT id, rol FROM ${Constantes.tabla_Usuario} WHERE correo = ? AND contrasena = ?"
+            val sentencia = "SELECT * FROM ${Constantes.tabla_Usuario} WHERE correo = ? AND contrasena = ?"
             val pstmt = Database.conexion!!.prepareStatement(sentencia)
             pstmt.setString(1, correo)
             pstmt.setString(2, KtorCifrado.cifrarContrasena(contrasena))
 
-            val resultado = pstmt.executeQuery()
-            if (resultado.next()) {
-                mensaje = resultado.getString("rol")
+            val rs = pstmt.executeQuery()
+            if (rs.next()) {
+                usuario.id = rs.getInt("id")
+                usuario.nombre = rs.getString("nombre")
+                usuario.rol = rs.getString("rol")
+                usuario.correo = rs.getString("correo")
+                usuario.contrasena = rs.getString("contrasena")
             } else {
-                mensaje = "0"
+                usuario.id = 0 // Indica que no se encontró ningún usuario con ese correo y contraseña
             }
         } catch (ex: SQLException) {
-            mensaje = ex.printStackTrace().toString()
+            ex.printStackTrace() // Manejo de la excepción, podrías querer cambiar esto según tus necesidades
         } finally {
             Database.cerrarConexion()
         }
-        return mensaje
+        return usuario
     }
-
 }
