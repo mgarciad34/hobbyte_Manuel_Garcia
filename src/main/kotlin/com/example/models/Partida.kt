@@ -1,7 +1,11 @@
 package com.example.models
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Partida(
-    val id: Int = 0,
+    var id: Int = 0,
     val idUsuario: Int? = null,
-    val tablero: String? = null
+    var tablero: String? = null
 )
+

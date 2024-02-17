@@ -21,5 +21,12 @@ class Token {
 
             return token
         }
+
+        fun verifyJWTToken() : JWTVerifier {
+            return JWT.require(HMAC256("algo"))
+             //   .withAudience(audience)
+             //   .withIssuer(issuer)
+                .build()
+        }
     }
 }

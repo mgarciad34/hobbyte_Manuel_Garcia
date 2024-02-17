@@ -1,19 +1,21 @@
 package com.example.plugins
 
 import com.example.config.Token
+import com.example.config.generarTablero
+import com.example.controllers.ControladorPartida
 import com.example.controllers.ControladorUsuario
 import com.example.models.LoginRequest
+import com.example.models.Partida
 import com.example.models.Usuario
-import com.example.models.Personaje
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.serialization.json.Json
 
 //Aqui llamamos a las clases de los controladores
 val controladorUsuario = ControladorUsuario()
+val controladorPartida = ControladorPartida()
 
 
 //Archivo para lanzar todas las peticiones de la API
@@ -45,6 +47,30 @@ fun Application.configureRouting() {
                 call.respond(HttpStatusCode.OK, token)
             }
 
+        }
+        post("/api/crear/tablero") {
+            try {
+                val partida = call.receive<Partida>()
+
+                if (partida.idUsuario != null) {
+                    val generarTablero = generarTablero()
+
+                    val casillas = call.parameters["casillas"]?.toIntOrNull() ?: 20
+                    val tablero = generarTablero.crearTablero(casillas)
+
+                    partida.tablero = tablero.toString()
+
+                    if (controladorPartida.crearPartida(partida)) {
+                        call.respondText("Tablero creado con éxito. ID de partida: ${partida.id}")
+                    } else {
+                        call.respondText("Error al crear el tablero.")
+                    }
+                } else {
+                    call.respond(HttpStatusCode.BadRequest, "Error: No se proporcionó el ID de usuario o es inválido.")
+                }
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, "Error interno del servidor: ${e.message}")
+            }
         }
     }
 }
