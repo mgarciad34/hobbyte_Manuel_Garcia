@@ -64,7 +64,7 @@ fun Application.configureRouting() {
 
                     if (controladorPartida.crearPartida(partida)) {
                         call.respondText("Tablero creado con éxito. ID de partida: ${partida.id}")
-                        val usuarioPersonaje = UsuarioPersonaje(0, partida.id, 50)
+                        val usuarioPersonaje = UsuarioPersonaje(0, partida.id, 50, 50, 50, 0)
                         controladorUsuarioPersonaje.crearUsuarioPersonaje(usuarioPersonaje)
                     } else {
                         call.respondText("Error al crear el tablero.")
