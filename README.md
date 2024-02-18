@@ -39,10 +39,13 @@ A partir de aqui todas las rutas requieren tener un token para poder funcionar
   POST http://127.0.0.1:8080/api/crear/tablero
 ```
 
-#### Obtener tableros del usuario
+#### Obtener partidas del usuario
 ```http
     GET http://127.0.0.1:8080/api/obtener/partidas/{id}
 ```
 
-
+#### Obtener tablero del usuario por id  y numero tablero
+```http
+    GET hhttp://127.0.0.1:8080/api/obtener/tablero/{id_usuario}/{id_tablero}
+```
 
