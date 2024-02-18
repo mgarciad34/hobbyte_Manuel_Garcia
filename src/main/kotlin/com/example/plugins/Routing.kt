@@ -30,7 +30,6 @@ fun Application.configureRouting() {
         get("/api") {
             call.respondText { "Servidor abierto en el puerto 8080" }
         }
-        // Ruta para registrar un usuario
         post("/api/registrar/usuario") {
             try {
                 val crearUsuario = call.receive<Usuario>()
@@ -177,31 +176,55 @@ fun Application.configureRouting() {
                         return@put
                     }
 
-                    val usuarioPersonaje = controladorUsuarioPersonaje.obtenerTablero(idUsuario, idUsuarioPersonaje)
+                    var usuarioPersonaje = controladorUsuarioPersonaje.obtenerTablero(idUsuario, idUsuarioPersonaje)
 
                     if (usuarioPersonaje != null) {
                         val tablero = controladorPartida.obtenerTablero(idUsuarioToken)
 
+                        var listaTablero: List<String> = emptyList()
+                        var elemento: String = ""
+
                         for (verTablero in tablero) {
-                            val listaTablero = verTablero.substring(1, verTablero.length - 1).split(", ").take(20)
-                            var elemento = listaTablero[usuarioPersonaje.prueba!!]
-                            if(usuarioPersonaje.prueba < listaTablero.size){
-                                val letra = elemento.substring(0, 1)
-                                val numero = elemento.substring(1)
+                            listaTablero = verTablero.substring(1, verTablero.length - 1).split(", ").take(20)
+                            elemento = listaTablero.getOrElse(usuarioPersonaje.prueba!!) { "" }
+                        }
 
-                                var personajeJugador: String = ""
-                                if(letra == "M"){
-                                    personajeJugador = "Gandalf"
-                                }else if (letra == "T"){
-                                    personajeJugador = "Thorin"
+                        var simulacion: UsuarioPersonaje? = null
+                        var nPrueba: Int = 0
+
+
+                        if (usuarioPersonaje.prueba!! < listaTablero.size) {
+                            val letra = elemento.substring(0, 1)
+                            val numero = elemento.substring(1)
+
+                            var personajeJugador: String = ""
+                            if (letra == "M") {
+                                personajeJugador = "Gandalf"
+                            } else if (letra == "T") {
+                                personajeJugador = "Thorin"
+                            } else {
+                                personajeJugador = "Bilbo"
+                            }
+                            simulacion = juego.jugarHobbyte(letra, numero.toInt(), usuarioPersonaje)
+                            controladorUsuarioPersonaje.actualizarUsuarioPersonaje(simulacion!!)
+                        }
+
+                        usuarioPersonaje = controladorUsuarioPersonaje.obtenerTablero(idUsuario, idUsuarioPersonaje)
+
+                        if (usuarioPersonaje != null) {
+                            if(usuarioPersonaje.prueba!! < 20){
+                                call.respond(HttpStatusCode.OK, usuarioPersonaje)
+                            } else {
+                                var vidaGandalf = usuarioPersonaje.magia!!.toInt()
+                                var vidaThorin = usuarioPersonaje.fuerza!!.toInt()
+                                var vidaBilbo = usuarioPersonaje.habilidad!!.toInt()
+
+                                if(vidaGandalf > 0 || vidaThorin > 0 || vidaBilbo > 0){
+                                    call.respond(HttpStatusCode.OK, "Ganaste")
                                 }else{
-                                    personajeJugador = "Bilbo"
+                                    call.respond(HttpStatusCode.OK, "Perdiste")
                                 }
-                                val simulacion :UsuarioPersonaje = juego.jugarHobbyte(letra, numero.toInt(), usuarioPersonaje)
-                                call.respond(HttpStatusCode.OK, simulacion)
 
-                            }else{
-                                call.respond(HttpStatusCode.OK, "Juego Terminado: ")
                             }
                         }
                     } else {
@@ -216,5 +239,6 @@ fun Application.configureRouting() {
                 call.respond(HttpStatusCode.InternalServerError, "Error del servidor")
             }
         }
+
     }
 }

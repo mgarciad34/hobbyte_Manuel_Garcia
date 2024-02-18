@@ -9,6 +9,6 @@ data class UsuarioPersonaje(
     var magia: Int? = null,
     var fuerza: Int? = null,
     var habilidad: Int? = null,
-    val prueba: Int? = null
+    var prueba: Int? = null
 
 )

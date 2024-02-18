@@ -8,7 +8,7 @@ class Juego {
         var juego: UsuarioPersonaje = usuarioPersonaje
         if(letra == "M"){
             val juego = juegoGandalf(numero, usuarioPersonaje)
-        }else if (letra == "T"){
+        }else if (letra == "F"){
             val juego = juegoThorin(numero, usuarioPersonaje)
         }else{
             val juego = juegoBilbo(numero, usuarioPersonaje)
@@ -34,6 +34,7 @@ class Juego {
                 }
             }
         }
+        usuarioPersonaje.prueba = usuarioPersonaje.prueba!! + 1
         return usuarioPersonaje
     }
 
@@ -54,6 +55,7 @@ class Juego {
                 }
             }
         }
+        usuarioPersonaje.prueba = usuarioPersonaje.prueba!! + 1
         return usuarioPersonaje
     }
 
@@ -74,6 +76,7 @@ class Juego {
                 }
             }
         }
+        usuarioPersonaje.prueba = usuarioPersonaje.prueba!! + 1
         return usuarioPersonaje
     }
 

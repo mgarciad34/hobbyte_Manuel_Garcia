@@ -85,4 +85,34 @@ class ControladorUsuarioPersonaje() {
         return usuarioPersonaje
     }
 
+    fun actualizarUsuarioPersonaje(usuarioPersonaje: UsuarioPersonaje) {
+        try {
+            Database.abrirConexion()
+
+            val sentencia = """
+            UPDATE usuariopersonaje
+            SET magia = ?,
+                fuerza = ?,
+                habilidad = ?,
+                prueba = ?
+            WHERE id = ?
+        """.trimIndent()
+
+            val pstmt = Database.conexion!!.prepareStatement(sentencia)
+            pstmt.setInt(1, usuarioPersonaje.magia ?: 0)
+            pstmt.setInt(2, usuarioPersonaje.fuerza ?: 0)
+            pstmt.setInt(3, usuarioPersonaje.habilidad ?: 0)
+            pstmt.setInt(4, usuarioPersonaje.prueba ?: 0)
+            pstmt.setInt(5, usuarioPersonaje.id)
+
+            pstmt.executeUpdate()
+
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+        } finally {
+            Database.cerrarConexion()
+        }
+    }
+
+
 }
