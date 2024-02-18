@@ -70,4 +70,26 @@ class ControladorPartida {
         }
         return partidas
     }
+    fun obtenerTablero(idUsuario: Int): ArrayList<String> {
+        val tableros = ArrayList<String>() // ArrayList para almacenar los tableros
+        try {
+            Database.abrirConexion()
+
+            val sentencia = "SELECT tablero FROM ${Constantes.tabla_Partidas} WHERE id_usuario = ?"
+            val pstmt = Database.conexion!!.prepareStatement(sentencia)
+            pstmt.setInt(1, idUsuario)
+
+            val rs = pstmt.executeQuery()
+
+            while (rs.next()) {
+                val tablero = rs.getString("tablero")
+                tableros.add(tablero)
+            }
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+        } finally {
+            Database.cerrarConexion()
+        }
+        return tableros
+    }
 }

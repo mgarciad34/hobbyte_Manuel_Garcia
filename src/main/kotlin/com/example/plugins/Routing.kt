@@ -6,6 +6,7 @@ import com.example.config.generarTablero
 import com.example.controllers.ControladorPartida
 import com.example.controllers.ControladorUsuario
 import com.example.controllers.ControladorUsuarioPersonaje
+import com.example.controllers.Juego
 import com.example.models.*
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -18,6 +19,7 @@ import io.ktor.server.routing.*
 val controladorUsuario = ControladorUsuario()
 val controladorPartida = ControladorPartida()
 val controladorUsuarioPersonaje = ControladorUsuarioPersonaje()
+val juego = Juego()
 
 // Aquí llamamos al token
 val tokenManager = TokenManager()
@@ -146,6 +148,62 @@ fun Application.configureRouting() {
 
                     if (usuarioPersonaje != null) {
                         call.respond(HttpStatusCode.OK, usuarioPersonaje)
+                    } else {
+                        call.respond(HttpStatusCode.NotFound, "Usuario o tablero incorrecto")
+                    }
+                } else {
+                    call.respond(HttpStatusCode.Unauthorized, "No autorizado")
+                }
+            } catch (e: JWTVerificationException) {
+                call.respond(HttpStatusCode.Unauthorized, "Error al verificar el token")
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, "Error del servidor")
+            }
+        }
+        put("/api/actualizar/tablero/{id_usuario}/{id_tablero}") {
+            try {
+                val token = call.request.headers["Authorization"]?.removePrefix("Bearer ")
+                if (token != null) {
+                    val verificarToken = tokenManager.verifyJWTToken()
+                    val jwt = verificarToken.verify(token)
+                    val idUsuarioToken = jwt.getClaim("id").asInt()
+                    val rolUsuario = jwt.getClaim("rol").asString()
+
+                    val idUsuario = call.parameters["id_usuario"]?.toIntOrNull()
+                    val idUsuarioPersonaje = call.parameters["id_tablero"]?.toIntOrNull()
+
+                    if (idUsuario == null || idUsuarioPersonaje == null || rolUsuario != "usuario") {
+                        call.respond(HttpStatusCode.BadRequest, "Parámetros de ruta no válidos")
+                        return@put
+                    }
+
+                    val usuarioPersonaje = controladorUsuarioPersonaje.obtenerTablero(idUsuario, idUsuarioPersonaje)
+
+                    if (usuarioPersonaje != null) {
+                        val tablero = controladorPartida.obtenerTablero(idUsuarioToken)
+
+                        for (verTablero in tablero) {
+                            val listaTablero = verTablero.substring(1, verTablero.length - 1).split(", ").take(20)
+                            var elemento = listaTablero[usuarioPersonaje.prueba!!]
+                            if(usuarioPersonaje.prueba < listaTablero.size){
+                                val letra = elemento.substring(0, 1)
+                                val numero = elemento.substring(1)
+
+                                var personajeJugador: String = ""
+                                if(letra == "M"){
+                                    personajeJugador = "Gandalf"
+                                }else if (letra == "T"){
+                                    personajeJugador = "Thorin"
+                                }else{
+                                    personajeJugador = "Bilbo"
+                                }
+                                val simulacion :UsuarioPersonaje = juego.jugarHobbyte(letra, numero.toInt(), usuarioPersonaje)
+                                call.respond(HttpStatusCode.OK, simulacion)
+
+                            }else{
+                                call.respond(HttpStatusCode.OK, "Juego Terminado: ")
+                            }
+                        }
                     } else {
                         call.respond(HttpStatusCode.NotFound, "Usuario o tablero incorrecto")
                     }

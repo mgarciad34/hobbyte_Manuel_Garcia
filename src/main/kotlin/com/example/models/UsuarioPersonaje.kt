@@ -6,9 +6,9 @@ import kotlinx.serialization.Serializable
 data class UsuarioPersonaje(
     var id: Int = 0,
     val idPartida: Int? = null,
-    val magia: Int? = null,
-    val fuerza: Int? = null,
-    val habilidad: Int? = null,
+    var magia: Int? = null,
+    var fuerza: Int? = null,
+    var habilidad: Int? = null,
     val prueba: Int? = null
 
 )
