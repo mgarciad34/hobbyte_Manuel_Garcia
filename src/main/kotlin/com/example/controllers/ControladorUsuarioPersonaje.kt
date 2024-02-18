@@ -2,6 +2,7 @@ package com.example.controllers
 
 import com.example.config.Constantes
 import com.example.config.Database
+import com.example.models.Usuario
 import java.sql.PreparedStatement
 import com.example.models.UsuarioPersonaje
 import java.sql.SQLException
@@ -46,6 +47,42 @@ class ControladorUsuarioPersonaje() {
         }
 
         return false
+    }
+
+    fun obtenerTablero(idUsuario: Int, idUsuarioPersonaje: Int): UsuarioPersonaje? {
+        var usuarioPersonaje: UsuarioPersonaje? = null
+        try {
+            Database.abrirConexion()
+
+            val sentencia = """
+            SELECT up.*
+            FROM usuariopersonaje up
+            INNER JOIN partidas p ON up.id_partida = p.id
+            WHERE p.id_usuario = ?
+            AND up.id = ?
+        """.trimIndent()
+            val pstmt = Database.conexion!!.prepareStatement(sentencia)
+            pstmt.setInt(1, idUsuario)
+            pstmt.setInt(2, idUsuarioPersonaje)
+
+            val rs = pstmt.executeQuery()
+
+            if (rs.next()) {
+                usuarioPersonaje = UsuarioPersonaje(
+                    id = rs.getInt("id"),
+                    idPartida = rs.getInt("id_partida"),
+                    magia = rs.getInt("magia"),
+                    fuerza = rs.getInt("fuerza"),
+                    habilidad = rs.getInt("habilidad"),
+                    prueba = rs.getInt("prueba")
+                )
+            }
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+        } finally {
+            Database.cerrarConexion()
+        }
+        return usuarioPersonaje
     }
 
 }
