@@ -60,8 +60,8 @@ fun Application.configureRouting() {
             try {
                 val token = call.request.headers["Authorization"]?.removePrefix("Bearer ")
                 if (token != null) {
-                    val verifier = tokenManager.verifyJWTToken()
-                    val jwt = verifier.verify(token)
+                    val verificarToken = tokenManager.verifyJWTToken()
+                    val jwt = verificarToken.verify(token)
                     val idUsuario = jwt.getClaim("id").asInt()
                     val rolUsuario = jwt.getClaim("rol").asString()
 
@@ -96,24 +96,34 @@ fun Application.configureRouting() {
             try {
                 val token = call.request.headers["Authorization"]?.removePrefix("Bearer ")
                 if (token != null) {
-                    val verifier = tokenManager.verifyJWTToken()
-                    verifier.verify(token)
+                    val verificarToken = tokenManager.verifyJWTToken()
+                    val jwt = verificarToken.verify(token)
+                    val idUsuarioToken = jwt.getClaim("id").asInt()
+                    val rolUsuario = jwt.getClaim("rol").asString()
 
-                    val idUsuario = call.parameters["idUsuario"]?.toIntOrNull()
-                    if (idUsuario == null) {
-                        call.respond(HttpStatusCode.BadRequest, "ID de usuario no válido")
-                        return@get
+                    if(rolUsuario == "usuario"){
+                        val idUsuario = call.parameters["idUsuario"]?.toIntOrNull()
+                        if (idUsuario == null) {
+                            call.respond(HttpStatusCode.BadRequest, "ID de usuario no válido")
+                            return@get
+                        }else {
+                            if(idUsuario == idUsuarioToken) {
+                                val partidas = controladorPartida.obtenerPartidasPorUsuario(idUsuarioToken)
+                                call.respond(HttpStatusCode.OK, partidas)
+                            }else{
+                                call.respond(HttpStatusCode.BadRequest, "El ID no coincide con el del token")
+                            }
+                        }
+                    }else{
+                        call.respond(HttpStatusCode.Unauthorized, "No tienes los roles necesarios")
                     }
-
-                    val partidas = controladorPartida.obtenerPartidasPorUsuario(idUsuario)
-                    call.respond(HttpStatusCode.OK, partidas)
                 } else {
-                    call.respond(HttpStatusCode.Unauthorized, "Token JWT no proporcionado en la solicitud")
+                    call.respond(HttpStatusCode.Unauthorized, "No autorizado")
                 }
             } catch (e: JWTVerificationException) {
-                call.respond(HttpStatusCode.Unauthorized, "Error al verificar el token JWT: ${e.message}")
+                call.respond(HttpStatusCode.Unauthorized, "Error al verificar el token")
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.InternalServerError, "Error interno del servidor: ${e.message}")
+                call.respond(HttpStatusCode.InternalServerError, "Error del servidor")
             }
         }
 
