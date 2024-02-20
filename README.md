@@ -1,8 +1,7 @@
 
 # Hobbyte API
 
-
-## API Reference
+## Funcionalidades comunes
 
 #### Registrar Usuario
 
@@ -30,8 +29,13 @@
 }
 ```
 
-
 A partir de aqui todas las rutas requieren tener un token para poder funcionar
+
+
+## Funcionalidad Administrador
+
+
+## Funcionalidad Usuarios
 
 #### Generar tablero
 
