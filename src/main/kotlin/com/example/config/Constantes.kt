@@ -6,7 +6,7 @@ object Constantes {
 
     var bbdd = "hobbit"
     var usuario = "root"
-    var passwd = ""
+    var passwd = "root"
 
     var tabla_Personaje = "personaje"
     var tabla_Partidas = "partidas"

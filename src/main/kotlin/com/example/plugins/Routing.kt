@@ -108,24 +108,24 @@ fun Application.configureRouting() {
                             return@get
                         } else {
                             if (idUsuario == idUsuarioToken) {
-                                val partidas = controladorPartida.obtenerPartidasPorUsuario(idUsuarioToken)
-                                call.respond(HttpStatusCode.OK, partidas)
-                            } else {
-                                call.respond(HttpStatusCode.BadRequest, "El ID no coincide con el del token")
+                                    val partidas = controladorPartida.obtenerPartidasPorUsuario(idUsuarioToken)
+                                    call.respond(HttpStatusCode.OK, partidas)
+                                } else {
+                                    call.respond(HttpStatusCode.BadRequest, "El ID no coincide con el del token")
+                                }
                             }
+                        } else {
+                            call.respond(HttpStatusCode.Unauthorized, "No tienes los roles necesarios")
                         }
                     } else {
-                        call.respond(HttpStatusCode.Unauthorized, "No tienes los roles necesarios")
+                        call.respond(HttpStatusCode.Unauthorized, "No autorizado")
                     }
-                } else {
-                    call.respond(HttpStatusCode.Unauthorized, "No autorizado")
+                } catch (e: JWTVerificationException) {
+                    call.respond(HttpStatusCode.Unauthorized, "Error al verificar el token")
+                } catch (e: Exception) {
+                    call.respond(HttpStatusCode.InternalServerError, "Error del servidor")
                 }
-            } catch (e: JWTVerificationException) {
-                call.respond(HttpStatusCode.Unauthorized, "Error al verificar el token")
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.InternalServerError, "Error del servidor")
             }
-        }
         get("/api/obtener/tablero/{id_usuario}/{id_tablero}") {
             try {
                 val token = call.request.headers["Authorization"]?.removePrefix("Bearer ")
@@ -239,6 +239,69 @@ fun Application.configureRouting() {
                 call.respond(HttpStatusCode.InternalServerError, "Error del servidor")
             }
         }
+        post("/administrador/registrar/usuario") {
+            try {
+                val token = call.request.headers["Authorization"]?.removePrefix("Bearer ")
+                if (token != null) {
+                    val verificarToken = tokenManager.verifyJWTToken()
+                    val jwt = verificarToken.verify(token)
+                    val rol = jwt.getClaim("rol").asString()
 
+                    if (rol == "administrador") {
+                        val crearUsuario = call.receive<Usuario>()
+                        val registrado = controladorUsuario.registrarUsuario(crearUsuario)
+
+                        if (registrado) {
+                            call.respond(HttpStatusCode.OK, "Usuario registrado exitosamente")
+                        } else {
+                            call.respond(HttpStatusCode.BadRequest, "Error al registrar usuario")
+                        }
+                    } else {
+                        call.respond(HttpStatusCode.Unauthorized, "No tienes los roles necesarios")
+                    }
+                } else {
+                    call.respond(HttpStatusCode.Unauthorized, "No autorizado")
+                }
+            } catch (e: JWTVerificationException) {
+                call.respond(HttpStatusCode.Unauthorized, "Error al verificar el token")
+            } catch (e: ContentTransformationException) {
+                call.respond(HttpStatusCode.InternalServerError, "Formato de datos no válido")
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, "Error del servidor")
+            }
+        }
+        delete("/administrador/eliminar/usuario/{id}") {
+            try {
+                val token = call.request.headers["Authorization"]?.removePrefix("Bearer ")
+                if (token != null) {
+                    val verificarToken = tokenManager.verifyJWTToken()
+                    val jwt = verificarToken.verify(token)
+                    val rol = jwt.getClaim("rol").asString()
+
+                    if (rol == "administrador") {
+                        val idUsuario = call.parameters["id"]?.toIntOrNull()
+                        if (idUsuario == null) {
+                            call.respond(HttpStatusCode.BadRequest, "ID de usuario no válido")
+                            return@delete
+                        } else {
+                            val eliminado = controladorUsuario.eliminarUsuario(idUsuario)
+                            if (eliminado) {
+                                call.respond(HttpStatusCode.OK, "Usuario eliminado exitosamente")
+                            } else {
+                                call.respond(HttpStatusCode.BadRequest, "Error al eliminar usuario")
+                            }
+                        }
+                    } else {
+                        call.respond(HttpStatusCode.Unauthorized, "No tienes los roles necesarios")
+                    }
+                } else {
+                    call.respond(HttpStatusCode.Unauthorized, "No autorizado")
+                }
+            } catch (e: JWTVerificationException) {
+                call.respond(HttpStatusCode.Unauthorized, "Error al verificar el token")
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, "Error del servidor")
+            }
+        }
     }
 }

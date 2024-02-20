@@ -67,6 +67,25 @@ class ControladorUsuario {
         return false
     }
 
+    fun existeUsuarioId(idUsuario: String): Boolean {
+        try {
+            val consulta = "SELECT COUNT(*) AS total FROM ${Constantes.tabla_Usuario} WHERE id = ?"
+
+            val pstmt = Database.conexion!!.prepareStatement(consulta)
+            pstmt.setInt(1, idUsuario.toInt())
+            val rs = pstmt.executeQuery()
+
+            if (rs.next()) {
+                val total = rs.getInt("total")
+                return total > 0
+            }
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+        }
+
+        return false
+    }
+
     //Funcion para loguearnos
     fun loginUsuario(correo: String, contrasena: String): Usuario {
         val usuario = Usuario()
@@ -95,4 +114,37 @@ class ControladorUsuario {
         }
         return usuario
     }
+
+    fun eliminarUsuario(idUsuario: Int): Boolean {
+        try {
+            Database.abrirConexion()
+
+            val usuarioExiste = existeUsuarioId(idUsuario.toString())
+            println(usuarioExiste)
+            if (!usuarioExiste) {
+                println("El usuario con ID $idUsuario no existe.")
+                return false
+            }
+
+            val sentencia = "DELETE FROM ${Constantes.tabla_Usuario} WHERE id = ?"
+            val pstmt = Database.conexion!!.prepareStatement(sentencia)
+            pstmt.setInt(1, idUsuario)
+
+            val filasAfectadas = pstmt.executeUpdate()
+
+            if (filasAfectadas > 0) {
+                println("Usuario con ID $idUsuario eliminado exitosamente.")
+                return true
+            } else {
+                println("No se eliminó ningún usuario con ID $idUsuario.")
+            }
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+        } finally {
+            Database.cerrarConexion()
+        }
+
+        return false
+    }
+
 }
