@@ -34,6 +34,35 @@ A partir de aqui todas las rutas requieren tener un token para poder funcionar
 
 ## Funcionalidad Administrador
 
+#### Agregar usuario desde el administrador 
+
+```http
+  POST http://127.0.0.1:8080/api/registrar/usuario
+```
+```json
+  {
+  "nombre": "nombre",
+  "rol": "usuario",
+  "correo": "nombre@ejemplo.com",
+  "contrasena": "12345"
+}
+```
+
+#### Obtener usuarios
+```http
+  GET http://127.0.0.1:8080/administrador/usuarios
+```
+
+#### Obtener usuario por ID
+```http
+  GET http://127.0.0.1:8080/administrador/usuario/{id}
+```
+
+#### Eliminar usuario desde el administrador
+```http
+  DELETE http://127.0.0.1:8080/administrador/eliminar/usuario/{id}
+```
+
 
 ## Funcionalidad Usuarios
 

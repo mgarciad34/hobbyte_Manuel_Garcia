@@ -147,6 +147,66 @@ class ControladorUsuario {
         return false
     }
 
+    fun consultarUsuarios(): List<Usuario> {
+        val usuarios = mutableListOf<Usuario>()
 
+        try {
+            Database.abrirConexion()
+
+            val consulta = "SELECT * FROM ${Constantes.tabla_Usuario} WHERE rol = ?"
+            val pstmt = Database.conexion!!.prepareStatement(consulta)
+            pstmt.setString(1, "usuario")
+
+            val rs = pstmt.executeQuery()
+
+            while (rs.next()) {
+                val usuario = Usuario(
+                    id = rs.getInt("id"),
+                    nombre = rs.getString("nombre"),
+                    rol = rs.getString("rol"),
+                    correo = rs.getString("correo"),
+                    contrasena = null
+                )
+                usuarios.add(usuario)
+            }
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+        } finally {
+            Database.cerrarConexion()
+        }
+
+        return usuarios
+    }
+
+    fun consultarUsuarioId(idUsuario: Int): Usuario? {
+        var usuario: Usuario? = null
+
+        try {
+            Database.abrirConexion()
+
+            val consulta = "SELECT * FROM ${Constantes.tabla_Usuario} WHERE id = ? AND rol = ?"
+            val pstmt = Database.conexion!!.prepareStatement(consulta)
+            pstmt.setInt(1, idUsuario)
+            pstmt.setString(2, "usuario")
+
+            val rs = pstmt.executeQuery()
+
+            if (rs.next()) {
+                usuario = Usuario(
+                    id = rs.getInt("id"),
+                    nombre = rs.getString("nombre"),
+                    rol = rs.getString("rol"),
+                    correo = rs.getString("correo"),
+                    contrasena = null
+                )
+            }
+        } catch (ex: SQLException) {
+            ex.printStackTrace()
+        } finally {
+            Database.cerrarConexion()
+        }
+
+        return usuario
+    }
 
 }

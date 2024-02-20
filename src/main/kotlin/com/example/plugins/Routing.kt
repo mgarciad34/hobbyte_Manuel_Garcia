@@ -288,20 +288,77 @@ fun Application.configureRouting() {
                             if (eliminado) {
                                 call.respond(HttpStatusCode.OK, "Usuario eliminado exitosamente")
                             } else {
-                                call.respond(HttpStatusCode.BadRequest, "Error al eliminar usuario")
+                                call.respond(HttpStatusCode.BadRequest, "El usuario ya no existe")
                             }
                         }
                     } else {
-                        call.respond(HttpStatusCode.Unauthorized, "No tienes los roles necesarios")
+                        call.respond(HttpStatusCode.Unauthorized, "No tienes permisos")
                     }
                 } else {
                     call.respond(HttpStatusCode.Unauthorized, "No autorizado")
                 }
             } catch (e: JWTVerificationException) {
-                call.respond(HttpStatusCode.Unauthorized, "Error al verificar el token")
+                call.respond(HttpStatusCode.Unauthorized, "No has verificado el token")
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, "Error del servidor")
             }
         }
+        get("/administrador/usuarios") {
+            try {
+                val token = call.request.headers["Authorization"]?.removePrefix("Bearer ")
+                if (token != null) {
+                    val verificarToken = tokenManager.verifyJWTToken()
+                    val jwt = verificarToken.verify(token)
+                    val rol = jwt.getClaim("rol").asString()
+
+                    if (rol == "administrador") {
+                        val usuarios = controladorUsuario.consultarUsuarios()
+                        call.respond(HttpStatusCode.OK, usuarios)
+                    } else {
+                        call.respond(HttpStatusCode.Unauthorized, "No tienes permisos")
+                    }
+                } else {
+                    call.respond(HttpStatusCode.Unauthorized, "No autorizado")
+                }
+            } catch (e: JWTVerificationException) {
+                call.respond(HttpStatusCode.Unauthorized, "No has verificado el token")
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, "Error del servidor")
+            }
+        }
+        get("/administrador/usuario/{id}") {
+            try {
+                val token = call.request.headers["Authorization"]?.removePrefix("Bearer ")
+                if (token != null) {
+                    val verificarToken = tokenManager.verifyJWTToken()
+                    val jwt = verificarToken.verify(token)
+                    val rol = jwt.getClaim("rol").asString()
+
+                    if (rol == "administrador") {
+                        val idUsuario = call.parameters["id"]?.toIntOrNull()
+                        if (idUsuario == null) {
+                            call.respond(HttpStatusCode.BadRequest, "ID de usuario no válido")
+                            return@get
+                        }
+
+                        val usuario = controladorUsuario.consultarUsuarioId(idUsuario)
+                        if (usuario != null) {
+                            call.respond(HttpStatusCode.OK, usuario)
+                        } else {
+                            call.respond(HttpStatusCode.NotFound, "Usuario no encontrado")
+                        }
+                    } else {
+                        call.respond(HttpStatusCode.Unauthorized, "No tienes permisos")
+                    }
+                } else {
+                    call.respond(HttpStatusCode.Unauthorized, "No autorizado")
+                }
+            } catch (e: JWTVerificationException) {
+                call.respond(HttpStatusCode.Unauthorized, "No has verificado el token")
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, "Error del servidor")
+            }
+        }
+
     }
 }
